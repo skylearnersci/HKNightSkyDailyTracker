@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HK Night Sky Explorer 2026-2028</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(160deg,#04041a,#0a0a2e 50%,#04041a);color:#fff;min-height:100vh;font-size:17px}
+#sf{position:fixed;inset:0;z-index:0;pointer-events:none}
+.w{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:14px 16px}
+h1{text-align:center;font-size:clamp(1.6rem,5vw,2.6rem);font-weight:900;background:linear-gradient(135deg,#ffe44d,#ff8c00,#ff4400);-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:16px 0 6px}
+.tag{text-align:center;color:#88aacc;font-size:1rem;margin-bottom:5px;font-weight:700}
+.badge{text-align:center;font-size:.72rem;color:#5577aa;margin-bottom:8px}
+#clockbox{text-align:center;margin:8px 0 14px;padding:10px 0;border-top:1px solid #1a1a40;border-bottom:1px solid #1a1a40}
+#digclock{font-size:2rem;font-weight:900;color:#ffd700;letter-spacing:4px;font-family:monospace}
+#clocksrc{font-size:.68rem;color:#3a5070;margin-top:3px;font-weight:700}
+.ytabs{display:flex;justify-content:center;gap:10px;margin-bottom:12px}
+.ytab{background:#0e0e38;border:2px solid #2a2a5a;color:#8899cc;border-radius:12px;font-size:1rem;font-weight:800;padding:7px 22px;cursor:pointer;transition:.2s}
+.ytab:hover{background:#1a1a55;color:#fff}
+.ytab.on{background:#1840aa;border-color:#4a80ff;color:#fff;box-shadow:0 0 14px #2255cc55}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px;margin-bottom:10px}
+.btn{background:#0e0e38;border:2px solid #2a2a5a;color:#ccd;border-radius:50%;width:48px;height:48px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.btn:hover{background:#1a1a55;border-color:#4a6aff;transform:scale(1.1)}
+.btnr{border-radius:24px;width:auto;padding:0 20px;font-size:.95rem;font-weight:800}
+#dp{background:#0e0e38;border:2px solid #3a4a7a;color:#fff;border-radius:12px;padding:8px 14px;font-size:1rem;cursor:pointer}
+#dp::-webkit-calendar-picker-indicator{filter:invert(.8)}
+.note{text-align:center;font-size:.72rem;color:#3a4a6a;margin-bottom:14px;line-height:1.6}
+#tonight{background:linear-gradient(135deg,#08102a,#0c1840);border:1.5px solid #1e3880;border-radius:14px;padding:13px 18px;text-align:center;font-size:1rem;color:#aac8f0;line-height:2;margin-bottom:12px;font-weight:700}
+#tonight b{color:#ffd700}
+#phase{text-align:center;font-size:1rem;color:#c0d4f8;margin-bottom:14px;font-weight:700}
+.axis{display:flex;margin-left:200px;margin-bottom:6px}
+.axlbl{flex:1;text-align:center;font-size:.68rem;color:#3a5070;font-weight:700}
+.prow{display:flex;align-items:center;margin-bottom:10px;gap:10px;cursor:pointer}
+.pinfo{width:190px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pphoto{width:50px;height:50px;border-radius:50%;object-fit:cover;border:2.5px solid rgba(255,255,255,.25);flex-shrink:0}
+.pname{font-size:.95rem;font-weight:800;line-height:1.25}
+.psub{font-size:.7rem;color:#6688aa;font-weight:700}
+.tl{flex:1;height:32px;background:#08082a;border-radius:8px;position:relative;overflow:hidden;border:1px solid #1a1a40}
+.bar{position:absolute;top:3px;height:26px;border-radius:6px;transition:.25s}
+.bar:hover{filter:brightness(1.4);transform:scaleY(1.1)}
+.ptime{font-size:.8rem;color:#667799;width:130px;flex-shrink:0;text-align:right;font-weight:700;line-height:1.6}
+#tip{position:fixed;background:rgba(4,4,28,.97);border:1.5px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 16px;font-size:.9rem;pointer-events:none;z-index:999;max-width:240px;display:none;line-height:1.7;box-shadow:0 8px 28px rgba(0,0,0,.7)}
+#tip b{color:#ffd700;display:block;font-size:.98rem;margin-bottom:3px}
+#panel{position:fixed;right:0;top:0;height:100%;width:min(320px,90vw);background:rgba(3,3,22,.98);border-left:1.5px solid rgba(255,255,255,.1);padding:24px 20px;transform:translateX(100%);transition:.3s;z-index:200;overflow-y:auto}
+#panel.open{transform:translateX(0)}
+#panel img{width:100%;border-radius:14px;margin-bottom:14px;max-height:200px;object-fit:cover;display:block}
+#panel h2{font-size:1.25rem;color:#ffd700;margin-bottom:8px;font-weight:900}
+.pfact{font-size:.9rem;color:#aac8ff;line-height:1.7;margin-bottom:10px}
+.ptimes{font-size:.9rem;color:#ffd700;font-weight:800;line-height:1.8}
+#pclose{position:absolute;top:12px;right:14px;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:1.4rem;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+#pclose:hover{background:rgba(255,255,255,.25)}
+.legwrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:12px 0 8px;font-size:.82rem}
+.legitem{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border-radius:20px;padding:4px 11px;cursor:pointer;transition:.15s;font-weight:700}
+.legitem:hover{background:rgba(255,255,255,.16)}
+.legdot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+footer{text-align:center;font-size:.68rem;color:#2a3a55;padding:18px 0 8px;line-height:2}
+.powered{text-align:center;font-size:.78rem;color:#8899bb;margin-bottom:5px;font-weight:700;letter-spacing:.3px}
+</style>
+</head>
+<body>
+<canvas id="sf"></canvas>
+<div class="w" id="app">
+  <h1>&#127775; HK Night Sky Explorer</h1>
+  <div class="powered">Powered by <b>Achievers Track</b> &nbsp;<a href="https://www.a-track.net" target="_blank" style="color:#ffa500;text-decoration:none">www.a-track.net</a></div>
+  <div class="tag">&#128301; When do planets rise &amp; set over Hong Kong?</div>
+  <div class="badge">NASA Photos &nbsp;&middot;&nbsp; Jean Meeus Algorithms &nbsp;&middot;&nbsp; 22&#176;18&#8242;N 114&#176;10&#8242;E &nbsp;&middot;&nbsp; Offline Ready</div>
+  <div id="clockbox">
+    <div id="digclock">--:--:-- HKT</div>
+    <div id="clocksrc">Syncing time&#8230;</div>
+  </div>
+  <div class="ytabs">
+    <button class="ytab" id="y2026" onclick="setY(2026)">2026</button>
+    <button class="ytab" id="y2027" onclick="setY(2027)">2027</button>
+    <button class="ytab" id="y2028" onclick="setY(2028)">2028</button>
+  </div>
+  <div class="ctrl">
+    <button class="btn" onclick="shift(-7)">&#9198;</button>
+    <button class="btn" onclick="shift(-1)">&#9664;</button>
+    <input type="date" id="dp" min="2026-01-01" max="2028-12-31" onchange="render(this.value)">
+    <button class="btn" onclick="shift(1)">&#9654;</button>
+    <button class="btn" onclick="shift(7)">&#9197;</button>
+    <button class="btn btnr" onclick="goToday()">&#128197; Today</button>
+  </div>
+  <div class="note">&#9201; Sun/planets &#177;10 min &nbsp;&middot;&nbsp; Moon &#177;8 min &nbsp;&middot;&nbsp; All times HKT (UTC+8)</div>
+  <div id="tonight"></div>
+  <div id="phase"></div>
+  <div class="axis" id="ax"></div>
+  <div id="rows"></div>
+  <div class="legwrap" id="leg"></div>
+  <footer>&#9728;&#65039; NASA SDO &nbsp;&middot;&nbsp; &#127769; NASA LRO &nbsp;&middot;&nbsp; Planets: NASA/JPL &nbsp;&middot;&nbsp; Jean Meeus <em>Astronomical Algorithms</em></footer>
+</div>
+<div id="tip"></div>
+<div id="panel">
+  <button id="pclose" onclick="closeP()">&#10005;</button>
+  <img id="pimg" src="" alt="">
+  <h2 id="ptitle"></h2>
+  <div class="pfact" id="pfact"></div>
+  <div class="ptimes" id="ptimes"></div>
+</div>
+<script>
+/* TIME */
+var _msOff=0;
+function _nowHKT(){return new Date(Date.now()+_msOff+28800000);}
+function hktDateStr(){var d=_nowHKT(),y=d.getUTCFullYear(),m=d.getUTCMonth()+1,dy=d.getUTCDate();return y+'-'+(m<10?'0':'')+m+'-'+(dy<10?'0':'')+dy;}
+function hktDecH(){var d=_nowHKT();return d.getUTCHours()+d.getUTCMinutes()/60+d.getUTCSeconds()/3600;}
+function syncTime(){
+  var el=document.getElementById('clocksrc'),t0=Date.now();
+  fetch('https://worldtimeapi.org/api/timezone/Asia/Hong_Kong')
+    .then(function(r){return r.json();})
+    .then(function(j){_msOff=j.unixtime*1000+Math.round((Date.now()-t0)/2)-Date.now();el.innerHTML='&#10003; Synced with WorldTimeAPI';el.style.color='#44dd88';})
+    .catch(function(){el.innerHTML='&#9888; Using local clock';el.style.color='#ff8844';});
+}
+
+/* TICK */
+var CUR='';
+function tick(){
+  var d=_nowHKT(),h=d.getUTCHours(),m=d.getUTCMinutes(),s=d.getUTCSeconds();
+  document.getElementById('digclock').textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s+' HKT';
+}
+
+/* ASTRONOMY */
+var LAT=(22+18/60)*Math.PI/180,LON_D=114+10/60,R2D=180/Math.PI;
+function jd(y,m,d){if(m<=2){y--;m+=12;}var A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;}
+function gmst0(J){var J0=Math.floor(J-0.5)+0.5,T=(J0-2451545)/36525;return((100.4606184+36000.77004*T+0.000387933*T*T)%360+360)%360;}
+function eps(T){return(23.4392911-0.0130042*T)*Math.PI/180;}
+function hmt(m){if(m===null)return null;m=((m%1)+1)%1;var hkt=(m*24+8)%24,hh=Math.floor(hkt),mm=Math.round((hkt-hh)*60);if(mm===60){hh=(hh+1)%24;mm=0;}return(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;}
+function sunRd(J){var T=(J-2451545)/36525,L0=(280.46646+36000.76983*T)%360,M=((357.52911+35999.05029*T)%360)*Math.PI/180,C=(1.914602-0.004817*T)*Math.sin(M)+(0.019993-0.000101*T)*Math.sin(2*M)+0.000289*Math.sin(3*M),lam=((L0+C)%360)*Math.PI/180,ep=eps(T);return[Math.atan2(Math.cos(ep)*Math.sin(lam),Math.cos(lam)),Math.asin(Math.sin(ep)*Math.sin(lam))];}
+function moonRd(J){var T=(J-2451545)/36525,L=(218.3164477+481267.88123421*T)%360,M=((357.5291092+35999.0502909*T)%360)*Math.PI/180,Mp=((134.9633964+477198.8675055*T+0.0087414*T*T)%360)*Math.PI/180,D=((297.8501921+445267.1114034*T)%360)*Math.PI/180,F=((93.2720950+483202.0175233*T)%360)*Math.PI/180,lon=L+6.288750*Math.sin(Mp)+1.274018*Math.sin(2*D-Mp)+0.658309*Math.sin(2*D)+0.213616*Math.sin(2*Mp)-0.185116*Math.sin(M)-0.114332*Math.sin(2*F)+0.058793*Math.sin(2*D-2*Mp)-0.057066*Math.sin(2*D-M-Mp)+0.053322*Math.sin(2*D+Mp)+0.045758*Math.sin(2*D-M)-0.040923*Math.sin(M-Mp)-0.034720*Math.sin(D)-0.030383*Math.sin(M+Mp)+0.015327*Math.sin(2*D-2*F)-0.012528*Math.sin(Mp+2*F)-0.010980*Math.sin(Mp-2*F)+0.010675*Math.sin(4*D-Mp)+0.010034*Math.sin(3*Mp)+0.008548*Math.sin(4*D-2*Mp),lat=5.128122*Math.sin(F)+0.280602*Math.sin(Mp+F)+0.277693*Math.sin(Mp-F)+0.173237*Math.sin(2*D-F)+0.055413*Math.sin(2*D-Mp+F)+0.046272*Math.sin(2*D-Mp-F)+0.032573*Math.sin(2*D+F)+0.017198*Math.sin(2*Mp+F)+0.009267*Math.sin(2*D+Mp-F)+0.008823*Math.sin(2*Mp-F)+0.008247*Math.sin(2*D-M-F)+0.004323*Math.sin(2*D-F-2*Mp)+0.004200*Math.sin(2*D+F+Mp),lm=lon*Math.PI/180,bt=lat*Math.PI/180,ep=eps(T);return[Math.atan2(Math.cos(ep)*Math.sin(lm)*Math.cos(bt)-Math.sin(bt)*Math.sin(ep),Math.cos(lm)*Math.cos(bt)),Math.asin(Math.cos(bt)*Math.sin(ep)*Math.sin(lm)+Math.sin(bt)*Math.cos(ep))];}
+var PE={mercury:[252.2503,149472.6741,0.387098,0.20563,77.4561,48.3313,7.005],venus:[181.9798,58517.8156,0.723330,0.00677,131.5637,76.6799,3.395],mars:[355.4330,19140.2993,1.523688,0.09341,336.0882,49.5581,1.850],jupiter:[34.3515,3034.9057,5.202561,0.04849,14.3312,100.4644,1.303],saturn:[50.0774,1222.1138,9.554747,0.05551,93.0568,113.6634,2.489]};
+function planetRd(J,pl){var T=(J-2451545)/36525,p=PE[pl],Lp=(p[0]+p[1]*T)%360,Mp=((Lp-p[4])%360)*Math.PI/180,Ep=Mp,i;for(i=0;i<8;i++)Ep=Mp+p[3]*Math.sin(Ep);var nu=2*Math.atan2(Math.sqrt(1+p[3])*Math.sin(Ep/2),Math.sqrt(1-p[3])*Math.cos(Ep/2)),rp=p[2]*(1-p[3]*Math.cos(Ep)),u=nu+(p[4]-p[5])*Math.PI/180,ir=p[6]*Math.PI/180,or=p[5]*Math.PI/180,hx=rp*(Math.cos(or)*Math.cos(u)-Math.sin(or)*Math.sin(u)*Math.cos(ir)),hy=rp*(Math.sin(or)*Math.cos(u)+Math.cos(or)*Math.sin(u)*Math.cos(ir)),hz=rp*Math.sin(u)*Math.sin(ir),Me=((357.52911+35999.05029*T)%360)*Math.PI/180,Ee=Me;for(i=0;i<8;i++)Ee=Me+0.016708634*Math.sin(Ee);var nue=2*Math.atan2(Math.sqrt(1.016708634)*Math.sin(Ee/2),Math.sqrt(0.983291366)*Math.cos(Ee/2)),re=1.000001018*(1-0.016708634*Math.cos(Ee)),ex=re*Math.cos(nue+102.9372*Math.PI/180),ey=re*Math.sin(nue+102.9372*Math.PI/180),gx=hx-ex,gy=hy-ey,gz=hz,R=Math.sqrt(gx*gx+gy*gy+gz*gz);if(R<1e-10)return[0,0];var lm=Math.atan2(gy,gx),bt=Math.asin(gz/R),ep=eps(T);return[Math.atan2(Math.cos(ep)*Math.sin(lm)-Math.tan(bt)*Math.sin(ep),Math.cos(lm)),Math.asin(Math.sin(ep)*Math.cos(bt)*Math.sin(lm)+Math.cos(ep)*Math.sin(bt))];}
+function getRs(fn,h0d,Jn){var Jm=Jn-0.5,th=gmst0(Jn),h0=h0d*Math.PI/180,rd=fn(Jn),ra=(R2D*rd[0]+360)%360,dc=rd[1],dn=Math.cos(LAT)*Math.cos(dc);if(Math.abs(dn)<1e-9)return[null,null];var cH=(Math.sin(h0)-Math.sin(LAT)*Math.sin(dc))/dn;if(Math.abs(cH)>1)return[null,null];var H0=R2D*Math.acos(cH),m0=((ra-LON_D-th)/360%1+1)%1,mr=(m0-H0/360+1)%1,ms=(m0+H0/360+1)%1,it,w,mv,ri,ri_d,di,Hi,ai,d2,dl;for(it=0;it<2;it++){for(w=0;w<2;w++){mv=w?ms:mr;ri=fn(Jm+mv);ri_d=(R2D*ri[0]+360)%360;di=ri[1];Hi=((th+360.985647*mv+LON_D-ri_d+180)%360)-180;ai=Math.asin(Math.sin(LAT)*Math.sin(di)+Math.cos(LAT)*Math.cos(di)*Math.cos(Hi*Math.PI/180));d2=360*Math.cos(di)*Math.cos(LAT)*Math.sin(Hi*Math.PI/180);if(Math.abs(d2)>1e-6){dl=(ai-h0)/d2;if(w)ms+=dl;else mr+=dl;}}}return[hmt(mr),hmt(ms)];}
+function getMoonRs(Jn){var Jm=Jn-0.5,th=gmst0(Jn),h0=0.125*Math.PI/180,rd=moonRd(Jm),ra=(R2D*rd[0]+360)%360,dc=rd[1],dn=Math.cos(LAT)*Math.cos(dc);if(Math.abs(dn)<1e-9)return[null,null];var cH=(Math.sin(h0)-Math.sin(LAT)*Math.sin(dc))/dn;if(Math.abs(cH)>1)return[null,null];var H0=R2D*Math.acos(cH),m0=((ra-LON_D-th)/360%1+1)%1,mr=(m0-H0/360+1)%1,ms=(m0+H0/360+1)%1,it,w,mv,ri,ri_d,di,Hi,ai,d2,dl;for(it=0;it<5;it++){for(w=0;w<2;w++){mv=w?ms:mr;ri=moonRd(Jm+mv);ri_d=(R2D*ri[0]+360)%360;di=ri[1];Hi=((th+360.985647*mv+LON_D-ri_d+180)%360)-180;ai=Math.asin(Math.sin(LAT)*Math.sin(di)+Math.cos(LAT)*Math.cos(di)*Math.cos(Hi*Math.PI/180));d2=360*Math.cos(di)*Math.cos(LAT)*Math.sin(Hi*Math.PI/180);if(Math.abs(d2)>1e-6){dl=(ai-h0)/d2;if(w)ms+=dl;else mr+=dl;}}}return[hmt(mr),hmt(ms)];}
+
+/* DATA CACHE */
+var CACHE={};
+function getDay(ds){
+  if(CACHE[ds])return CACHE[ds];
+  var y=parseInt(ds.slice(0,4)),mo=parseInt(ds.slice(5,7)),dy=parseInt(ds.slice(8,10));
+  var J=jd(y,mo,dy)+0.5,e={};
+  var sr=getRs(sunRd,-0.8333,J);e.sun={rise:sr[0],set:sr[1]};
+  var mr=getMoonRs(J);e.moon={rise:mr[0],set:mr[1]};
+  var pls=['mercury','venus','mars','jupiter','saturn'];
+  for(var i=0;i<pls.length;i++){
+    (function(pl){var pr=getRs(function(J2){return planetRd(J2,pl);},-0.5667,J);e[pl]={rise:pr[0],set:pr[1]};})(pls[i]);
+  }
+  CACHE[ds]=e;return e;
+}
+
+/* CONFIG */
+var BD=['sun','moon','mercury','venus','mars','jupiter','saturn'];
+var NM={sun:'Sun',moon:'Moon',mercury:'Mercury',venus:'Venus',mars:'Mars',jupiter:'Jupiter',saturn:'Saturn'};
+var EM={sun:'\u2600\ufe0f',moon:'\ud83c\udf19',mercury:'\ud83e\udd84',venus:'\u2b50',mars:'\ud83d\udd34',jupiter:'\ud83c\udf24',saturn:'\ud83c\udf9d'};
+var COL={sun:'#FFD700',moon:'#C8DEFF',mercury:'#9BB8D4',venus:'#FFB347',mars:'#FF6040',jupiter:'#D4A050',saturn:'#EED880'};
+var IMG={
+  sun:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/120px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg',
+  moon:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/120px-FullMoon2010.jpg',
+  mercury:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/120px-Mercury_in_true_color.jpg',
+  venus:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/120px-Venus-real_color.jpg',
+  mars:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/120px-OSIRIS_Mars_true_color.jpg',
+  jupiter:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/120px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+  saturn:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/120px-Saturn_during_Equinox.jpg'
+};
+var FACTS={
+  sun:'The Sun is a giant star 1.3 million times the volume of Earth. Every second it converts 4 million tonnes of mass into energy. Light takes 8 minutes to reach Earth.',
+  moon:'The Moon is 384,000 km away and orbits Earth every 27 days. Twelve astronauts walked on it between 1969-1972. It drifts 3.8 cm farther from Earth each year.',
+  mercury:'Mercury completes a year in just 88 days. Surface temperatures swing from -180C at night to 430C at noon. NASA MESSENGER orbited it from 2011 to 2015.',
+  venus:'Venus is the hottest planet at 465C. Its thick CO2 atmosphere traps heat in a runaway greenhouse effect. It rotates backwards, so the Sun rises in the west.',
+  mars:'Mars has the tallest volcano in the solar system, Olympus Mons at 22 km. NASA rovers Curiosity and Perseverance are exploring it now. A Martian day is 24h 37m.',
+  jupiter:'Jupiter is so massive that 1300 Earths could fit inside it. Its Great Red Spot storm has raged for 300 years. It has 95 known moons including Europa.',
+  saturn:'Saturn rings span 282,000 km and are made of ice and rock. It is so light it could float on water. The Cassini mission explored it for 13 years until 2017.'
+};
+var SH=14,TH=20;
+function toH(t){if(!t)return null;var p=t.split(':');return +p[0]+ +p[1]/60;}
+function toP(h){var o=(h-SH+24)%24;return o>TH?null:o/TH*100;}
+function moonPhase(ds){
+  var d=new Date(ds),k=new Date('2000-01-06T18:14:00Z'),syn=29.53058867;
+  var p=(((d-k)/86400000%syn)+syn)%syn/syn;
+  var ic=['\ud83c\udf11','\ud83c\udf12','\ud83c\udf13','\ud83c\udf14','\ud83c\udf15','\ud83c\udf16','\ud83c\udf17','\ud83c\udf18'];
+  var nm=['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'];
+  var th=[0.03,0.22,0.28,0.47,0.53,0.72,0.78,0.97],i;
+  for(i=0;i<th.length;i++){if(p<th[i])return ic[i]+' '+nm[i];}
+  return ic[0]+' New Moon';
+}
+
+/* UI BUILDERS */
+function buildAx(){
+  var el=document.getElementById('ax'),i,h,hh,mm;
+  el.innerHTML='';
+  for(i=0;i<=10;i++){
+    h=(SH+TH/10*i)%24;hh=Math.floor(h);mm=Math.round((h-hh)*60);
+    el.innerHTML+='<div class="axlbl" style="width:10%">'+(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm+'</div>';
+  }
+}
+function buildLeg(){
+  var el=document.getElementById('leg');
+  el.innerHTML='';
+  BD.forEach(function(id){
+    var div=document.createElement('div');
+    div.className='legitem';
+    div.dataset.id=id;
+    div.innerHTML='<div class="legdot" style="background:'+COL[id]+'"></div>'+EM[id]+' '+NM[id];
+    el.appendChild(div);
+  });
+  el.addEventListener('click',function(e){
+    var item=e.target.closest('.legitem');
+    if(item)openP(item.dataset.id,'','');
+  });
+}
+
+/* RENDER */
+function render(ds){
+  if(!ds||ds<'2026-01-01'||ds>'2028-12-31')return;
+  CUR=ds;
+  var y=parseInt(ds.slice(0,4));
+  BD.forEach(function(id){});
+  ['2026','2027','2028'].forEach(function(yr){
+    var b=document.getElementById('y'+yr);
+    if(b)b.className='ytab'+(parseInt(yr)===y?' on':'');
+  });
+  var E=getDay(ds);
+  var srH=toH(E.sun&&E.sun.rise)||6,ssH=toH(E.sun&&E.sun.set)||18,vis=[];
+  BD.forEach(function(id){
+    if(id==='sun')return;
+    var b=E[id];if(!b||!b.rise||!b.set)return;
+    var r=toH(b.rise),s=toH(b.set),sA=s<r?s+24:s,nE=srH+24;
+    if((r<nE&&sA>ssH)||(r+24<nE&&sA+24>ssH))vis.push(EM[id]+' '+NM[id]);
+  });
+  document.getElementById('tonight').innerHTML=vis.length
+    ?'<b>\ud83d\udd2d Tonight you can spot:</b><br>'+vis.join(' &nbsp;&middot;&nbsp; ')+'<br><br><span style="font-size:.76rem;color:#aac4e8;font-style:italic;line-height:1.7;display:block;margin-top:7px;border-top:1px solid #1e2a45;padding-top:7px"><b style="color:#ffd700">&#128214; Psalm 8:3–4 (NIV)</b><br>“When I consider your heavens, the work of your fingers,<br>the moon and the stars, which you have set in place,<br>what is mankind that you are mindful of them,<br>human beings that you care for them?”</span>'
+    :'<b>No planets in dark sky tonight</b><br><span style="font-size:.88rem;color:#778899">All rise/set near the Sun today</span><br><br><span style="font-size:.76rem;color:#aac4e8;font-style:italic;line-height:1.7;display:block;margin-top:7px;border-top:1px solid #1e2a45;padding-top:7px"><b style="color:#ffd700">&#128214; Psalm 8:3–4 (NIV)</b><br>“When I consider your heavens, the work of your fingers,<br>the moon and the stars, which you have set in place,<br>what is mankind that you are mindful of them,<br>human beings that you care for them?”</span>';
+  document.getElementById('phase').innerHTML=moonPhase(ds);
+
+  var rowsEl=document.getElementById('rows');
+  rowsEl.innerHTML='';
+  BD.forEach(function(id){
+    var b=E[id],col=COL[id];
+    var rise=b&&b.rise?b.rise:'',set=b&&b.set?b.set:'';
+    var dur=0,bars='',tm='Not visible today';
+    if(rise&&set){
+      var r=toH(rise),s=toH(set);
+      dur=s>=r?s-r:24-r+s;
+      tm='\u2191 '+rise+'<br>\u2193 '+set;
+      var rp=toP(r),sp=toP(s);
+      function seg(l,r2){
+        if(l===null||r2===null||l>=r2)return null;
+        l=Math.max(0,l);r2=Math.min(100,r2);
+        if(l>=r2)return null;
+        var d=document.createElement('div');
+        d.className='bar';
+        d.style.cssText='left:'+l+'%;width:'+(r2-l)+'%;background:linear-gradient(90deg,'+col+'88,'+col+');box-shadow:0 0 8px '+col+'44';
+        d.dataset.id=id;d.dataset.rise=rise;d.dataset.set=set;d.dataset.dur=dur.toFixed(1);
+        return d;
+      }
+      var segs=[];
+      if(rp!==null&&sp!==null){segs=sp>=rp?[seg(rp,sp)]:[seg(rp,100),seg(0,sp)];}
+      else if(rp!==null)segs=[seg(rp,100)];
+      else if(sp!==null)segs=[seg(0,sp)];
+      bars=segs;
+    }
+    var dh=rise&&set?(function(){var r=toH(rise),s=toH(set),d=s>=r?s-r:24-r+s;return Math.floor(d)+'h '+Math.round((d%1)*60)+'m';})():'Not visible';
+
+    var row=document.createElement('div');
+    row.className='prow';row.dataset.id=id;row.dataset.rise=rise;row.dataset.set=set;
+
+    var info=document.createElement('div');info.className='pinfo';
+    info.innerHTML='<img class="pphoto" src="'+IMG[id]+'" alt="'+NM[id]+'">'
+      +'<div><div class="pname" style="color:'+col+'">'+NM[id]+'</div><div class="psub">'+dh+'</div></div>';
+
+    var tl=document.createElement('div');tl.className='tl';
+    if(bars&&bars.length){bars.forEach(function(b){if(b)tl.appendChild(b);});}
+
+    var pt=document.createElement('div');pt.className='ptime';pt.innerHTML=tm;
+
+    row.appendChild(info);row.appendChild(tl);row.appendChild(pt);
+    rowsEl.appendChild(row);
+  });
+
+  /* event delegation for rows */
+  rowsEl.onclick=function(e){
+    var row=e.target.closest('.prow');
+    if(!row)return;
+    var bar=e.target.closest('.bar');
+    if(bar){showTipEl(e,bar.dataset.id,bar.dataset.rise,bar.dataset.set,parseFloat(bar.dataset.dur));return;}
+    openP(row.dataset.id,row.dataset.rise,row.dataset.set);
+  };
+  rowsEl.onmousemove=function(e){var bar=e.target.closest('.bar');if(bar)moveTip(e);};
+  rowsEl.onmouseleave=function(){hideTip();};
+  rowsEl.onmouseout=function(e){if(!e.target.closest('.bar'))hideTip();};
+
+  tick();
+}
+
+/* TOOLTIP */
+function showTipEl(e,id,rise,set,dur){
+  var t=document.getElementById('tip');
+  t.innerHTML='<b>'+EM[id]+' '+NM[id]+'</b>\u2191 '+rise+' HKT<br>\u2193 '+set+' HKT<br>\u23f3 '+Math.floor(dur)+'h '+Math.round((dur%1)*60)+'m in sky';
+  t.style.display='block';moveTip(e);
+}
+function moveTip(e){var t=document.getElementById('tip');t.style.left=Math.min(e.clientX+14,window.innerWidth-260)+'px';t.style.top=Math.max(8,e.clientY-8)+'px';}
+function hideTip(){document.getElementById('tip').style.display='none';}
+
+/* PANEL */
+function openP(id,rise,set){
+  document.getElementById('pimg').src=IMG[id];
+  document.getElementById('ptitle').innerHTML=EM[id]+' '+NM[id];
+  document.getElementById('pfact').textContent=FACTS[id];
+  var t='';if(rise&&set)t='\u2191 '+rise+' HKT<br>\u2193 '+set+' HKT';
+  document.getElementById('ptimes').innerHTML=t;
+  document.getElementById('panel').classList.add('open');
+}
+function closeP(){document.getElementById('panel').classList.remove('open');}
+
+/* NAV */
+function shift(n){if(!CUR)return;var d=new Date(CUR+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);var iso=d.toISOString().slice(0,10);if(iso<'2026-01-01'||iso>'2028-12-31')return;document.getElementById('dp').value=iso;render(iso);}
+function goToday(){var t=hktDateStr();if(t>='2026-01-01'&&t<='2028-12-31'){document.getElementById('dp').value=t;render(t);}}
+function setY(y){var suf=CUR?CUR.slice(4):'-01-01',iso=String(y)+suf;if(iso<'2026-01-01'||iso>'2028-12-31')iso=String(y)+'-01-01';document.getElementById('dp').value=iso;render(iso);}
+
+/* STARFIELD */
+(function(){
+  var c=document.getElementById('sf'),ctx=c.getContext('2d'),st=[],i;
+  function rsz(){c.width=innerWidth;c.height=innerHeight;st=[];for(i=0;i<200;i++)st.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.4+0.2,a:Math.random(),da:(Math.random()-.5)*.006});}
+  window.addEventListener('resize',rsz);rsz();
+  function drw(){ctx.clearRect(0,0,c.width,c.height);for(i=0;i<st.length;i++){var s=st[i];s.a=Math.max(0.1,Math.min(1,s.a+s.da));if(s.a<=0.1||s.a>=1)s.da*=-1;ctx.globalAlpha=s.a;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;requestAnimationFrame(drw);}
+  drw();
+})();
+
+/* INIT */
+syncTime();
+buildAx();buildLeg();
+var _t=hktDateStr(),_init=(_t>='2026-01-01'&&_t<='2028-12-31')?_t:'2026-03-13';
+document.getElementById('dp').value=_init;
+render(_init);
+setInterval(tick,1000);
+</script>
+</body>
+</html>
